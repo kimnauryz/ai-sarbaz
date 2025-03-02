@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:6.0
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    environment:
+      - MONGO_INITDB_DATABASE=chatdb
+    networks:
+      - spring-ai-network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/chatdb --quiet
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - spring-ai-network
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  spring-ai-chat:
+    build: .
+    container_name: spring-ai-chat
+    ports:
+      - "8080:8080"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      ollama:
+        condition: service_started
+    environment:
+      - SPRING_DATA_MONGODB_HOST=mongodb
+      - SPRING_DATA_MONGODB_PORT=27017
+      - SPRING_DATA_MONGODB_DATABASE=chatdb
+      - SPRING_AI_OLLAMA_BASE_URL=http://ollama:11434
+      - APP_FILE_STORAGE_PATH=/app/uploads
+    volumes:
+      - uploads_data:/app/uploads
+    networks:
+      - spring-ai-network
+
+volumes:
+  mongodb_data:
+  ollama_data:
+  uploads_data:
+
+networks:
+  spring-ai-network:
+    driver: bridge
