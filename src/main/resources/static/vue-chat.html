@@ -395,6 +395,94 @@
             opacity: 0;
             transform: translateY(20px);
         }
+
+        /* Add these CSS styles to the <style> section in vue-chat.html */
+
+        /* Animated typing cursor for streaming text */
+        .streaming-message {
+            position: relative;
+        }
+
+        .streaming-message::after {
+            content: '|';
+            position: relative;
+            display: inline-block;
+            color: #0d6efd;
+            animation: blink 0.7s infinite;
+            margin-left: 2px;
+        }
+
+        @keyframes blink {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0;
+            }
+        }
+
+        /* Enhanced typing indicator animation */
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            width: max-content;
+        }
+
+        .typing-text {
+            margin-right: 10px;
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #0d6efd;
+            border-radius: 50%;
+            margin: 0 2px;
+            animation: typingAnimation 1.5s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(1) {
+            animation-delay: 0s;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.3s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.6s;
+        }
+
+        @keyframes typingAnimation {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-5px);
+            }
+        }
+
+        /* Message transition animations */
+        .message-enter-active, .message-leave-active {
+            transition: all 0.3s ease;
+        }
+
+        .message-enter-from, .message-leave-to {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        /* Smooth content transition */
+        .message-content {
+            transition: all 0.2s ease;
+        }
     </style>
 </head>
 <body>
@@ -487,26 +575,28 @@
                         </button>
                     </div>
                 </div>
-                
+
                 <div class="chat-messages" ref="messagesContainer">
                     <template v-for="(message, index) in messages" :key="index">
-                        <div :class="['message', message.type.toLowerCase() + '-message']">
-                            <div>{{ message.content }}</div>
-                            
-                            <!-- Вложения, если есть -->
+                        <div :class="['message', message.type.toLowerCase() + '-message',
+                     isStreaming && message.id.startsWith('temp-assistant') ? 'streaming-message' : '']">
+                            <div class="message-content">{{ message.content }}</div>
+
+                            <!-- Attachments, if any -->
                             <div v-if="message.attachments && message.attachments.length > 0" class="message-attachments mt-2">
                                 <div v-for="(attachment, i) in message.attachments" :key="i" class="attachment-badge">
                                     <i class="bi bi-paperclip"></i>
                                     {{ attachment.filename }}
                                 </div>
                             </div>
-                            
+
                             <div class="message-time">{{ formatTime(message.timestamp) }}</div>
                         </div>
                     </template>
-                    
-                    <!-- Индикатор набора текста -->
-                    <div v-if="isTyping" class="typing-indicator assistant-message">
+
+                    <!-- Typing indicator (shown during non-streaming responses) -->
+                    <div v-if="isTyping && !isStreaming" class="typing-indicator">
+                        <span class="typing-text">Печатает</span>
                         <div class="typing-dot"></div>
                         <div class="typing-dot"></div>
                         <div class="typing-dot"></div>
@@ -630,6 +720,9 @@
                 const newChatTitle = ref('');
                 const isSidebarCollapsed = ref(window.innerWidth < 768);
                 const messagesContainer = ref(null);
+                const isStreaming = ref(false);
+                const streamingMessage = ref('');
+                const streamingChatId = ref(null);
                 
                 // Модальные окна
                 let renameChatModal = null;
@@ -776,14 +869,84 @@
                         isSidebarCollapsed.value = true;
                     }
                 };
-                
+
+                /**
+                 * Start EventSource for server-sent events
+                 */
+                const startEventSource = async (formData, tempAssistantId) => {
+                    try {
+                        // First, upload the form data
+                        const uploadResponse = await fetch('/chat/streaming/prompt', {
+                            method: 'POST',
+                            body: formData
+                        });
+
+                        if (!uploadResponse.ok) {
+                            throw new Error('Failed to initiate streaming');
+                        }
+
+                        // Begin reading the response as a stream of events
+                        const reader = uploadResponse.body.getReader();
+                        const decoder = new TextDecoder();
+
+                        while (true) {
+                            const { done, value } = await reader.read();
+
+                            if (done) {
+                                // Streaming is complete
+                                break;
+                            }
+
+                            // Decode the chunk and process events
+                            const chunk = decoder.decode(value, { stream: true });
+                            const lines = chunk.split('\n\n');
+
+                            for (const line of lines) {
+                                if (line.startsWith('data:')) {
+                                    const data = line.substring(5).trim();
+
+                                    // Update streaming message content
+                                    if (data) {
+                                        streamingMessage.value += data;
+
+                                        // Update the message in the UI
+                                        const messageIndex = messages.value.findIndex(m => m.id === tempAssistantId);
+                                        if (messageIndex !== -1) {
+                                            messages.value[messageIndex].content = streamingMessage.value;
+                                        }
+                                    }
+                                }
+                            }
+
+                            // Scroll to the latest message
+                            nextTick(() => {
+                                if (messagesContainer.value) {
+                                    messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight;
+                                }
+                            });
+                        }
+                    } catch (error) {
+                        console.error('Error during streaming:', error);
+                    } finally {
+                        // Clean up streaming state
+                        isTyping.value = false;
+                        isStreaming.value = false;
+
+                        // Refresh chat history to get the final message with the correct ID
+                        await loadChatHistory(currentChat.value.id, 0);
+
+                        // Update chat list to show the latest chat state
+                        await loadChats();
+                    }
+                };
+
                 const sendMessage = async () => {
                     if (!newMessage.value.trim() || isTyping.value) return;
-                    
+
                     const messageText = newMessage.value;
                     newMessage.value = '';
-                    
-                    // Временно добавляем сообщение пользователя
+
+                    // Temporarily add user message
                     messages.value.push({
                         id: 'temp-' + Date.now(),
                         chatId: currentChat.value.id,
@@ -791,38 +954,45 @@
                         content: messageText,
                         timestamp: new Date().toISOString()
                     });
-                    
-                    // Показываем индикатор набора текста
+
+                    // Initialize streaming state
                     isTyping.value = true;
-                    
+                    isStreaming.value = true;
+                    streamingMessage.value = '';
+                    streamingChatId.value = currentChat.value.id;
+
+                    // Add a placeholder for the assistant's response
+                    const tempAssistantId = 'temp-assistant-' + Date.now();
+                    messages.value.push({
+                        id: tempAssistantId,
+                        chatId: currentChat.value.id,
+                        type: 'ASSISTANT',
+                        content: '',
+                        timestamp: new Date().toISOString()
+                    });
+
                     try {
                         const formData = new FormData();
                         formData.append('model', currentModel.value);
                         formData.append('prompt', messageText);
                         formData.append('role', 'helpful assistant');
                         formData.append('chatId', currentChat.value.id);
-                        
-                        // Добавляем файлы, если они есть
+
+                        // Add files if they exist
                         selectedFiles.value.forEach(file => {
                             formData.append('attachments', file);
                         });
-                        
-                        // Очищаем список выбранных файлов
+
+                        // Clear selected files
                         selectedFiles.value = [];
-                        
-                        const response = await axios.post(API.sendMessage, formData);
-                        const result = response.data;
-                        
-                        // Обновляем историю чата
-                        await loadChatHistory(currentChat.value.id, 0);
-                        
-                        // Обновляем список чатов, чтобы получить актуальное название
-                        await loadChats();
+
+                        // Start the streaming connection
+                        startEventSource(formData, tempAssistantId);
                     } catch (error) {
-                        console.error('Ошибка при отправке сообщения:', error);
-                        alert('Произошла ошибка при отправке сообщения');
-                    } finally {
+                        console.error('Error initiating streaming message:', error);
                         isTyping.value = false;
+                        isStreaming.value = false;
+                        alert('Произошла ошибка при отправке сообщения');
                     }
                 };
                 
@@ -943,7 +1113,8 @@
                     if (!timestamp) return '';
                     return new Date(timestamp).toLocaleTimeString();
                 };
-                
+
+
                 return {
                     // Состояние
                     chats,
