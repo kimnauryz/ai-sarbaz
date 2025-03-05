@@ -483,10 +483,327 @@
         .message-content {
             transition: all 0.2s ease;
         }
+
+        /* Advanced Streaming Message Styling */
+
+        /* Base style for streaming messages with cursor */
+        .streaming-message .message-content {
+            position: relative;
+            min-height: 1.5em;
+        }
+
+        /* Animated cursor that blinks at the end of streaming text */
+        .streaming-message .message-content::after {
+            content: '';
+            display: inline-block;
+            width: 2px;
+            height: 1em;
+            background-color: #0d6efd;
+            margin-left: 2px;
+            vertical-align: middle;
+            animation: streamingCursor 0.8s infinite;
+        }
+
+        @keyframes streamingCursor {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        /* Smooth fade-in for new content chunks */
+        @keyframes fadeInContent {
+            from { opacity: 0.5; }
+            to { opacity: 1; }
+        }
+
+        /* Apply a subtle highlight to the newest chunk of text */
+        .newest-chunk {
+            animation: highlightText 2s ease-out forwards;
+            display: inline;
+        }
+
+        @keyframes highlightText {
+            0% { background-color: rgba(13, 110, 253, 0.1); }
+            100% { background-color: transparent; }
+        }
+
+        /* Enhanced typing indicator */
+        .typing-indicator {
+            position: relative;
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 10px 15px;
+            margin-bottom: 15px;
+            max-width: 120px;
+            opacity: 0.9;
+            transition: opacity 0.3s ease;
+        }
+
+        .typing-indicator:hover {
+            opacity: 1;
+        }
+
+        .typing-dots {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .typing-dot {
+            width: 6px;
+            height: 6px;
+            margin: 0 3px;
+            background-color: #6c757d;
+            border-radius: 50%;
+            animation: typingPulse 1.5s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(1) { animation-delay: 0s; }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typingPulse {
+            0%, 100% { transform: scale(1); opacity: 0.7; }
+            50% { transform: scale(1.2); opacity: 1; }
+        }
+
+        /* Error notification styling */
+        .error-toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            border-radius: 4px;
+            padding: 12px 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 9999;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        .error-toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .error-toast-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        .error-toast-title {
+            font-weight: bold;
+        }
+
+        .error-toast-close {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            color: #721c24;
+            padding: 0;
+        }
+
+        /* Connection status indicator */
+        .connection-status {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            align-items: center;
+            padding: 5px 10px;
+            border-radius: 30px;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            z-index: 9999;
+        }
+
+        .connection-status-connected {
+            background-color: rgba(25, 135, 84, 0.1);
+            color: #198754;
+            border: 1px solid #198754;
+        }
+
+        .connection-status-disconnected {
+            background-color: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+            border: 1px solid #dc3545;
+        }
+
+        .connection-status-icon {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+
+        .connection-status-connected .connection-status-icon {
+            background-color: #198754;
+            box-shadow: 0 0 0 3px rgba(25, 135, 84, 0.3);
+        }
+
+        .connection-status-disconnected .connection-status-icon {
+            background-color: #dc3545;
+            box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.3);
+        }
+
+        /* Enhanced styling for word-by-word streaming */
+
+        /* Improved streaming message with text highlighting */
+        .streaming-message .message-content {
+            position: relative;
+            min-height: 1.5em;
+            line-height: 1.6;
+        }
+
+        /* Animated cursor that blinks at the end of streaming text - redesigned for better word flow */
+        .streaming-message .message-content::after {
+            content: '';
+            display: inline-block;
+            width: 2px;
+            height: 1.2em;
+            background-color: #0d6efd;
+            margin-left: 2px;
+            vertical-align: middle;
+            animation: streamingCursor 0.8s infinite;
+            position: relative;
+            top: 2px;
+        }
+
+        @keyframes streamingCursor {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        /* Improved animation for newest word chunks */
+        .newest-chunk {
+            display: inline;
+            opacity: 0;
+            animation: fadeInWords 0.3s ease-in forwards;
+        }
+
+        @keyframes fadeInWords {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        /* Natural highlighting that fades out gradually for word boundaries */
+        @keyframes naturalHighlight {
+            0% { background-color: rgba(13, 110, 253, 0.1); }
+            100% { background-color: transparent; }
+        }
+
+        .newest-chunk {
+            animation: fadeInWords 0.3s ease-in forwards, naturalHighlight 2s ease-out forwards;
+        }
+
+        /* Enhanced typing indicator for non-streaming responses */
+        .typing-indicator {
+            position: relative;
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 10px 15px;
+            margin-bottom: 15px;
+            max-width: 120px;
+            opacity: 0.9;
+            transition: opacity 0.3s ease;
+        }
+
+        /* Streaming status indicator */
+        .streaming-status {
+            display: flex;
+            align-items: center;
+            padding: 6px 12px;
+            background-color: rgba(13, 110, 253, 0.05);
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        /* Link styling in messages */
+        .message-content a {
+            color: #0d6efd;
+            text-decoration: underline;
+            text-underline-offset: 2px;
+            transition: color 0.2s ease;
+        }
+
+        .message-content a:hover {
+            color: #0a58ca;
+            text-decoration: underline;
+        }
+
+        /* Make the text more readable */
+        .message-content {
+            line-height: 1.6;
+            font-size: 1rem;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        /* Enhanced message animations for word-by-word flow */
+        .message-enter-active {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .message-enter-from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        /* Make sure code blocks and preformatted text are styled correctly */
+        .message-content pre, .message-content code {
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            padding: 0.2em 0.4em;
+            font-family: SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.9em;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .message-content pre {
+            padding: 1em;
+            margin: 0.5em 0;
+            overflow: auto;
+        }
+
+        /* Ensure line breaks are preserved for better readability */
+        .message-content {
+            white-space: pre-wrap;
+        }
+
+        /* Ensure scrolling is smooth when new content appears */
+        .chat-messages {
+            scroll-behavior: smooth;
+        }
     </style>
 </head>
 <body>
     <div id="app">
+        <!-- Connection Status Indicator -->
+        <div v-if="connectionStatus !== 'connected'"
+             :class="['connection-status',
+             connectionStatus === 'reconnecting' ? 'connection-status-reconnecting' : 'connection-status-disconnected']">
+            <div class="connection-status-icon"></div>
+            <span v-if="connectionStatus === 'disconnected'">Disconnected</span>
+            <span v-else-if="connectionStatus === 'reconnecting'">Reconnecting...</span>
+        </div>
+        <!-- Error Toast Notification -->
+        <div class="error-toast" :class="{ 'show': errorToastVisible }">
+            <div class="error-toast-header">
+                <span class="error-toast-title">{{ errorToast?.title }}</span>
+                <button class="error-toast-close" @click="errorToastVisible = false">&times;</button>
+            </div>
+            <div class="error-toast-body">
+                {{ errorToast?.message }}
+            </div>
+        </div>
         <!-- Боковая панель со списком чатов -->
         <div class="sidebar" :class="{ 'collapsed': isSidebarCollapsed }">
             <button class="btn btn-primary new-chat-btn" @click="createNewChat">
@@ -579,8 +896,8 @@
                 <div class="chat-messages" ref="messagesContainer">
                     <template v-for="(message, index) in messages" :key="index">
                         <div :class="['message', message.type.toLowerCase() + '-message',
-                     isStreaming && message.id.startsWith('temp-assistant') ? 'streaming-message' : '']">
-                            <div class="message-content">{{ message.content }}</div>
+                    isStreaming && message.id.startsWith('temp-assistant') ? 'streaming-message' : '']">
+                            <div class="message-content" v-html="formatMessageContent(message.content)"></div>
 
                             <!-- Attachments, if any -->
                             <div v-if="message.attachments && message.attachments.length > 0" class="message-attachments mt-2">
@@ -594,12 +911,13 @@
                         </div>
                     </template>
 
-                    <!-- Typing indicator (shown during non-streaming responses) -->
+                    <!-- Enhanced typing indicator (shown during non-streaming responses) -->
                     <div v-if="isTyping && !isStreaming" class="typing-indicator">
-                        <span class="typing-text">Печатает</span>
-                        <div class="typing-dot"></div>
-                        <div class="typing-dot"></div>
-                        <div class="typing-dot"></div>
+                        <div class="typing-dots">
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                        </div>
                     </div>
                 </div>
                 
@@ -623,34 +941,44 @@
                         </li>
                     </ul>
                 </nav>
-                
+
                 <div class="chat-input-container">
+                    <div v-if="isStreaming" class="streaming-status mb-2">
+                        <div class="spinner-border spinner-border-sm text-primary me-2" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <span class="small text-muted">Generating response...</span>
+                    </div>
+
                     <div class="file-list" v-if="selectedFiles.length > 0">
                         <div v-for="(file, index) in selectedFiles" :key="index" class="file-item">
                             {{ file.name }}
                             <span class="file-remove" @click="removeFile(index)">×</span>
                         </div>
                     </div>
-                    
+
                     <div class="input-row">
-                        <textarea 
-                            class="form-control chat-input" 
-                            placeholder="Введите ваше сообщение..." 
-                            rows="2"
-                            v-model="newMessage"
-                            @keydown.enter.prevent="handleEnterKey"
-                        ></textarea>
-                        
-                        <button class="btn btn-primary btn-send" @click="sendMessage" :disabled="isTyping || !newMessage.trim()">
-                            <i class="bi bi-send"></i>
+        <textarea
+                class="form-control chat-input"
+                placeholder="Введите ваше сообщение..."
+                rows="2"
+                v-model="newMessage"
+                @keydown.enter.prevent="handleEnterKey"
+                :disabled="isStreaming"
+        ></textarea>
+
+                        <button class="btn btn-primary btn-send"
+                                @click="sendMessage"
+                                :disabled="isStreaming || !newMessage.trim()">
+                            <i class="bi" :class="isStreaming ? 'bi-hourglass-split' : 'bi-send'"></i>
                         </button>
                     </div>
-                    
+
                     <div class="file-upload">
-                        <label for="attachments" class="btn btn-sm btn-outline-secondary me-2">
+                        <label for="attachments" class="btn btn-sm btn-outline-secondary me-2" :class="{ 'disabled': isStreaming }">
                             <i class="bi bi-paperclip me-1"></i> Прикрепить файл
                         </label>
-                        <input type="file" id="attachments" multiple @change="handleFileUpload" style="display: none;">
+                        <input type="file" id="attachments" multiple @change="handleFileUpload" style="display: none;" :disabled="isStreaming">
                         <small class="text-muted" v-if="selectedFiles.length > 0">
                             Выбрано файлов: {{ selectedFiles.length }}
                         </small>
@@ -692,7 +1020,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
-                    <button type="button" class="btn btn-danger" @click="deleteChat">Удалить</button>
+                    <button type="button" class="btn btn-danger" @click="$emit('deleteChat')">Удалить</button>
                 </div>
             </div>
         </div>
@@ -700,8 +1028,8 @@
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        const { createApp, ref, computed, watch, nextTick, onMounted } = Vue;
-        
+        const { createApp, ref, computed, watch, nextTick, onMounted, onUnmounted } = Vue;
+
         const app = createApp({
             setup() {
                 // Данные приложения
@@ -723,7 +1051,18 @@
                 const isStreaming = ref(false);
                 const streamingMessage = ref('');
                 const streamingChatId = ref(null);
-                
+
+                const connectionStatus = ref('connected'); // 'connected', 'disconnected', 'reconnecting'
+                const errorToast = ref(null);
+                const errorToastVisible = ref(false);
+                const reconnectCount = ref(0);
+                const maxReconnectAttempts = 3;
+
+                const lastContentLength = ref({}); // To track content length for each message
+
+                const heartbeatTimer = ref(null);
+                const lastContentTimestamp = ref(Date.now());
+
                 // Модальные окна
                 let renameChatModal = null;
                 let deleteChatModal = null;
@@ -759,6 +1098,20 @@
                     window.addEventListener('resize', () => {
                         isSidebarCollapsed.value = window.innerWidth < 768;
                     });
+
+                    window.addEventListener('online', () => {
+                        updateConnectionStatus('connected');
+                    });
+
+                    window.addEventListener('offline', () => {
+                        updateConnectionStatus('disconnected');
+                    });
+                });
+
+                onUnmounted(() => {
+                    if (heartbeatTimer.value) {
+                        clearInterval(heartbeatTimer.value);
+                    }
                 });
                 
                 // Вычисляемые свойства
@@ -871,80 +1224,344 @@
                 };
 
                 /**
-                 * Start EventSource for server-sent events
+                 * Shows an error notification toast
                  */
-                const startEventSource = async (formData, tempAssistantId) => {
-                    try {
-                        // First, upload the form data
-                        const uploadResponse = await fetch('/chat/streaming/prompt', {
-                            method: 'POST',
-                            body: formData
-                        });
+                const showErrorNotification = (title, message, duration = 5000) => {
+                    errorToast.value = {
+                        title: title || 'Error',
+                        message: message || 'An unexpected error occurred'
+                    };
+                    errorToastVisible.value = true;
 
-                        if (!uploadResponse.ok) {
-                            throw new Error('Failed to initiate streaming');
-                        }
+                    // Hide toast after duration
+                    setTimeout(() => {
+                        errorToastVisible.value = false;
+                    }, duration);
+                };
 
-                        // Begin reading the response as a stream of events
-                        const reader = uploadResponse.body.getReader();
-                        const decoder = new TextDecoder();
+                /**
+                 * Handles network status change
+                 */
+                const updateConnectionStatus = (status) => {
+                    connectionStatus.value = status;
 
-                        while (true) {
-                            const { done, value } = await reader.read();
-
-                            if (done) {
-                                // Streaming is complete
-                                break;
-                            }
-
-                            // Decode the chunk and process events
-                            const chunk = decoder.decode(value, { stream: true });
-                            const lines = chunk.split('\n\n');
-
-                            for (const line of lines) {
-                                if (line.startsWith('data:')) {
-                                    const data = line.substring(5).trim();
-
-                                    // Update streaming message content
-                                    if (data) {
-                                        streamingMessage.value += data;
-
-                                        // Update the message in the UI
-                                        const messageIndex = messages.value.findIndex(m => m.id === tempAssistantId);
-                                        if (messageIndex !== -1) {
-                                            messages.value[messageIndex].content = streamingMessage.value;
-                                        }
-                                    }
-                                }
-                            }
-
-                            // Scroll to the latest message
-                            nextTick(() => {
-                                if (messagesContainer.value) {
-                                    messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight;
-                                }
-                            });
-                        }
-                    } catch (error) {
-                        console.error('Error during streaming:', error);
-                    } finally {
-                        // Clean up streaming state
-                        isTyping.value = false;
-                        isStreaming.value = false;
-
-                        // Refresh chat history to get the final message with the correct ID
-                        await loadChatHistory(currentChat.value.id, 0);
-
-                        // Update chat list to show the latest chat state
-                        await loadChats();
+                    if (status === 'disconnected') {
+                        showErrorNotification(
+                            'Connection Lost',
+                            'The connection to the server was lost. Attempting to reconnect...'
+                        );
+                    } else if (status === 'connected' && reconnectCount.value > 0) {
+                        showErrorNotification(
+                            'Connection Restored',
+                            'The connection has been successfully restored.',
+                            3000
+                        );
                     }
                 };
 
-                const sendMessage = async () => {
+                /**
+                 * Start heartbeat connection to keep SSE alive
+                 */
+                const startHeartbeat = () => {
+                    if (heartbeatTimer.value) {
+                        clearInterval(heartbeatTimer.value);
+                    }
+
+                    // Check if we're already connected to the heartbeat endpoint
+                    if (typeof EventSource !== 'undefined') {
+                        const heartbeatSource = new EventSource('/chat/streaming/heartbeat');
+
+                        heartbeatSource.addEventListener('heartbeat', (event) => {
+                            console.log('Heartbeat received:', event.data);
+                            // Update last activity time
+                            lastContentTimestamp.value = Date.now();
+                        });
+
+                        heartbeatSource.addEventListener('error', () => {
+                            console.warn('Heartbeat connection error, reconnecting...');
+                            heartbeatSource.close();
+
+                            // Reconnect after a brief delay
+                            setTimeout(() => {
+                                startHeartbeat();
+                            }, 3000);
+                        });
+
+                        // Set up an interval to check for stale connections
+                        heartbeatTimer.value = setInterval(() => {
+                            const now = Date.now();
+                            const elapsed = now - lastContentTimestamp.value;
+
+                            // If no activity for 30 seconds, consider connection stale
+                            if (elapsed > 30000 && isStreaming.value) {
+                                console.warn('Connection appears stale, restarting heartbeat');
+                                heartbeatSource.close();
+                                startHeartbeat();
+                            }
+                        }, 15000);
+                    }
+                };
+
+                /**
+                 * Attempt to reconnect to server
+                 */
+                const attemptReconnect = async (formData, tempAssistantId) => {
+                    if (reconnectCount.value >= maxReconnectAttempts) {
+                        updateConnectionStatus('disconnected');
+                        showErrorNotification(
+                            'Connection Failed',
+                            `Unable to reconnect after ${maxReconnectAttempts} attempts. Please try again later.`
+                        );
+                        isTyping.value = false;
+                        isStreaming.value = false;
+                        return false;
+                    }
+
+                    updateConnectionStatus('reconnecting');
+                    reconnectCount.value++;
+
+                    try {
+                        // Try to fetch a small test endpoint to check connectivity
+                        const testResponse = await fetch('/chat/health', {
+                            method: 'GET',
+                            headers: { 'Cache-Control': 'no-cache' }
+                        });
+
+                        if (testResponse.ok) {
+                            // If connection test passes, restart the stream
+                            updateConnectionStatus('connected');
+
+                            // Wait a moment before retrying
+                            await new Promise(resolve => setTimeout(resolve, 1000));
+
+                            // Attempt to restart the stream
+                            return startEventSource(formData, tempAssistantId);
+                        } else {
+                            // Connection test failed, try again after delay
+                            await new Promise(resolve => setTimeout(resolve, 2000 * reconnectCount.value));
+                            return attemptReconnect(formData, tempAssistantId);
+                        }
+                    } catch (error) {
+                        // Network error, try again after delay
+                        await new Promise(resolve => setTimeout(resolve, 2000 * reconnectCount.value));
+                        return attemptReconnect(formData, tempAssistantId);
+                    }
+                };
+
+                /**
+                 * Enhanced streaming with better error handling
+                 */
+                const startEventSource = async (formData, tempAssistantId) => {
+                    reconnectCount.value = 0;
+                    updateConnectionStatus('connected');
+
+                    try {
+                        // Use fetch with timeout for better control
+                        const abortController = new AbortController();
+                        const timeoutId = setTimeout(() => abortController.abort(), 30000); // 30 second timeout
+
+                        const response = await fetch('/chat/streaming/prompt', {
+                            method: 'POST',
+                            body: formData,
+                            signal: abortController.signal
+                        });
+
+                        clearTimeout(timeoutId);
+
+                        if (!response.ok) {
+                            throw new Error(`Server error: ${response.status} ${response.statusText}`);
+                        }
+
+                        const reader = response.body.getReader();
+                        const decoder = new TextDecoder();
+
+                        let buffer = '';
+                        let lastActivityTime = Date.now();
+                        const activityCheckInterval = setInterval(() => {
+                            // Check if we've had activity in the last 10 seconds
+                            if (Date.now() - lastActivityTime > 10000) {
+                                clearInterval(activityCheckInterval);
+                                reader.cancel("No activity timeout");
+                                throw new Error("No response from server for too long");
+                            }
+                        }, 5000);
+
+                        while (true) {
+                            try {
+                                const { done, value } = await reader.read();
+
+                                if (done) {
+                                    console.log('Stream completed naturally');
+                                    clearInterval(activityCheckInterval);
+                                    break;
+                                }
+
+                                // Update activity timestamp
+                                lastActivityTime = Date.now();
+
+                                // Process the chunk
+                                buffer += decoder.decode(value, { stream: true });
+
+                                // Handle complete events
+                                const lines = buffer.split('\n\n');
+                                buffer = lines.pop() || '';
+
+                                let newContent = '';
+
+                                for (const eventText of lines) {
+                                    if (!eventText.trim()) continue;
+
+                                    const eventData = eventText.split('\n')
+                                        .filter(line => line.startsWith('data: '))
+                                        .map(line => line.substring(6).trim())
+                                        .join('');
+
+                                    if (eventData) {
+                                        newContent += eventData;
+                                    }
+                                }
+
+                                if (newContent) {
+                                    // Update streaming message with the new content
+                                    streamingMessage.value += newContent;
+
+                                    // Update UI with newest chunk highlighted
+                                    const messageIndex = messages.value.findIndex(m => m.id === tempAssistantId);
+                                    if (messageIndex !== -1) {
+                                        const updatedMessage = {...messages.value[messageIndex]};
+                                        updatedMessage.content = streamingMessage.value;
+
+                                        // Replace message to trigger reactivity
+                                        messages.value.splice(messageIndex, 1, updatedMessage);
+
+                                        // Scroll to bottom with each update
+                                        nextTick(() => {
+                                            if (messagesContainer.value) {
+                                                messagesContainer.value.scrollTop = messagesContainer.value.scrollHeight;
+                                            }
+                                        });
+                                    }
+                                }
+                            } catch (readError) {
+                                clearInterval(activityCheckInterval);
+
+                                // Check if it's an abort error from our timeout
+                                if (readError.name === 'AbortError') {
+                                    throw new Error('Request timed out');
+                                }
+
+                                // For other read errors, try to recover
+                                console.error('Error reading stream:', readError);
+
+                                // Try to reconnect
+                                return await attemptReconnect(formData, tempAssistantId);
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Streaming error:', error);
+
+                        // Network or fetch errors
+                        if (error.name === 'TypeError' || error.name === 'AbortError' ||
+                            error.message.includes('network') || error.message.includes('fetch')) {
+                            return await attemptReconnect(formData, tempAssistantId);
+                        }
+
+                        // Other errors
+                        showErrorNotification('Error',
+                            'There was a problem with the message stream: ' + error.message);
+                    } finally {
+                        isTyping.value = false;
+                        isStreaming.value = false;
+
+                        // Ensure a complete response by fetching the chat history
+                        setTimeout(async () => {
+                            await loadChatHistory(currentChat.value.id, 0);
+                            await loadChats();
+                        }, 500);
+                    }
+                };
+
+                /**
+                 * Enhanced format message content function with smoother transitions
+                 * for word-boundary chunks
+                 */
+                const formatMessageContent = (content) => {
+                    if (!content) return '';
+
+                    // Escape HTML to prevent XSS
+                    const escapeHtml = (text) => {
+                        const div = document.createElement('div');
+                        div.textContent = text;
+                        return div.innerHTML;
+                    };
+
+                    // For non-streaming or completed messages, just return escaped content
+                    if (!isStreaming.value) {
+                        return escapeHtml(content)
+                            // Convert URLs to clickable links
+                            .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" class="text-primary">$1</a>')
+                            // Maintain line breaks for readability
+                            .replace(/\n/g, '<br>');
+                    }
+
+                    // Get message ID of the streaming message
+                    const streamingMessageId = messages.value.find(m =>
+                        m.type === 'ASSISTANT' && m.content === streamingMessage.value)?.id;
+
+                    if (!streamingMessageId) {
+                        return escapeHtml(content)
+                            .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" class="text-primary">$1</a>')
+                            .replace(/\n/g, '<br>');
+                    }
+
+                    // Initialize last content length for this message if not existing
+                    if (lastContentLength.value[streamingMessageId] === undefined) {
+                        lastContentLength.value[streamingMessageId] = 0;
+                    }
+
+                    const prevLength = lastContentLength.value[streamingMessageId];
+                    const currentLength = content.length;
+
+                    // No new content
+                    if (currentLength <= prevLength) {
+                        return escapeHtml(content)
+                            .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" class="text-primary">$1</a>')
+                            .replace(/\n/g, '<br>');
+                    }
+
+                    // There is new content to highlight - this will be complete words thanks to backend chunking
+                    const existingContent = escapeHtml(content.substring(0, prevLength))
+                        .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" class="text-primary">$1</a>')
+                        .replace(/\n/g, '<br>');
+
+                    const newContent = escapeHtml(content.substring(prevLength))
+                        .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" class="text-primary">$1</a>')
+                        .replace(/\n/g, '<br>');
+
+                    // Update the tracked length
+                    lastContentLength.value[streamingMessageId] = currentLength;
+
+                    // Return content with the new part wrapped in highlighting span
+                    // The transition will be smoother because we're adding complete words/phrases
+                    return `${existingContent}<span class="newest-chunk">${newContent}</span>`;
+                };
+
+                /**
+                 * Sends a message using improved streaming API
+                 */
+                const sendStreamingMessage = async () => {
                     if (!newMessage.value.trim() || isTyping.value) return;
 
                     const messageText = newMessage.value;
                     newMessage.value = '';
+
+                    // Reset streaming state
+                    streamingMessage.value = '';
+                    reconnectCount.value = 0;
+                    lastContentTimestamp.value = Date.now();
+
+                    // Start the heartbeat connection
+                    startHeartbeat();
 
                     // Temporarily add user message
                     messages.value.push({
@@ -958,7 +1575,6 @@
                     // Initialize streaming state
                     isTyping.value = true;
                     isStreaming.value = true;
-                    streamingMessage.value = '';
                     streamingChatId.value = currentChat.value.id;
 
                     // Add a placeholder for the assistant's response
@@ -970,6 +1586,9 @@
                         content: '',
                         timestamp: new Date().toISOString()
                     });
+
+                    // Initialize the content length tracker for the new message
+                    lastContentLength.value[tempAssistantId] = 0;
 
                     try {
                         const formData = new FormData();
@@ -986,15 +1605,201 @@
                         // Clear selected files
                         selectedFiles.value = [];
 
-                        // Start the streaming connection
-                        startEventSource(formData, tempAssistantId);
+                        // Start the streaming process with fetch API
+                        processStreamingResponse(formData, tempAssistantId);
                     } catch (error) {
                         console.error('Error initiating streaming message:', error);
-                        isTyping.value = false;
-                        isStreaming.value = false;
-                        alert('Произошла ошибка при отправке сообщения');
+                        handleStreamingError(tempAssistantId, error);
                     }
                 };
+
+                /**
+                 * Process the streaming response with fetch API for word-boundary chunks
+                 */
+                const processStreamingResponse = async (formData, tempAssistantId) => {
+                    try {
+                        // Use fetch for better control of the request
+                        const response = await fetch('/chat/streaming/prompt', {
+                            method: 'POST',
+                            body: formData
+                        });
+
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! Status: ${response.status}`);
+                        }
+
+                        // Get a reader from the response body
+                        const reader = response.body.getReader();
+                        const decoder = new TextDecoder();
+
+                        let buffer = '';
+
+                        // Process the stream
+                        while (true) {
+                            const { done, value } = await reader.read();
+
+                            if (done) {
+                                console.log('Stream completed naturally');
+                                break;
+                            }
+
+                            // Update last activity timestamp
+                            lastContentTimestamp.value = Date.now();
+
+                            // Decode and process the chunk
+                            const chunk = decoder.decode(value, { stream: true });
+                            buffer += chunk;
+
+                            // Split the buffer by SSE delimiter (double newline)
+                            const events = buffer.split('\n\n');
+                            buffer = events.pop() || ''; // Keep the last chunk (might be incomplete)
+
+                            // Process each complete event
+                            for (const eventText of events) {
+                                if (!eventText.trim()) continue;
+
+                                // Parse event type and data
+                                const eventLines = eventText.split('\n');
+                                let eventType = 'message';
+                                let eventData = '';
+
+                                for (const line of eventLines) {
+                                    if (line.startsWith('event:')) {
+                                        eventType = line.substring(6).trim();
+                                    } else if (line.startsWith('data:')) {
+                                        eventData = line.substring(5).trim();
+                                    }
+                                }
+
+                                // Handle different event types
+                                if (eventType === 'message' && eventData) {
+                                    // Update the message content - now with complete words
+                                    updateStreamingMessage(tempAssistantId, eventData);
+                                } else if (eventType === 'error') {
+                                    // Handle error events
+                                    if (eventData.startsWith('error:')) {
+                                        eventData = eventData.substring(6).trim();
+                                    }
+                                    throw new Error(eventData || 'Unknown streaming error');
+                                }
+                            }
+                        }
+
+                        // Stream completed successfully
+                        console.log('Streaming completed successfully');
+
+                        // Clean up
+                        finalizeStreaming();
+                    } catch (error) {
+                        console.error('Error during streaming:', error);
+                        handleStreamingError(tempAssistantId, error);
+                    }
+                };
+
+                /**
+                 * Enhanced method for updating streaming message with natural word flow
+                 */
+                const updateStreamingMessage = (messageId, newContent) => {
+                    // Add new content to the streaming message
+                    streamingMessage.value += newContent;
+
+                    // Update the message in the UI
+                    const messageIndex = messages.value.findIndex(m => m.id === messageId);
+                    if (messageIndex !== -1) {
+                        // Create a new message object to ensure Vue reactivity
+                        const updatedMessage = {...messages.value[messageIndex]};
+                        updatedMessage.content = streamingMessage.value;
+
+                        // Replace the message in the array
+                        messages.value.splice(messageIndex, 1, updatedMessage);
+
+                        // Scroll to the bottom with animation to make it smoother
+                        animateScrollToBottom();
+                    }
+                };
+
+                /**
+                 * Helper method to smoothly scroll to the bottom of the chat
+                 */
+                const animateScrollToBottom = () => {
+                    nextTick(() => {
+                        if (messagesContainer.value) {
+                            const container = messagesContainer.value;
+                            const scrollHeight = container.scrollHeight;
+                            const currentScroll = container.scrollTop + container.clientHeight;
+
+                            // If we're already near the bottom, scroll immediately
+                            if (scrollHeight - currentScroll < 100) {
+                                container.scrollTop = scrollHeight;
+                            } else {
+                                // Otherwise, only scroll if the user hasn't scrolled up to read previous messages
+                                const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 200;
+                                if (isNearBottom) {
+                                    container.scrollTop = scrollHeight;
+                                }
+                            }
+                        }
+                    });
+                };
+
+                /**
+                 * Finalize the streaming process
+                 */
+                const finalizeStreaming = async () => {
+                    // Reset streaming state
+                    isTyping.value = false;
+                    isStreaming.value = false;
+
+                    // Refresh history to get permanent message IDs
+                    setTimeout(async () => {
+                        await loadChatHistory(currentChat.value.id, 0);
+                        await loadChats();
+                    }, 500);
+                };
+
+                /**
+                 * Handle streaming errors
+                 */
+                const handleStreamingError = async (messageId, error) => {
+                    console.error('Streaming error:', error);
+
+                    // Show error notification
+                    showErrorNotification(
+                        'Message Error',
+                        error.message || 'There was an error generating the response'
+                    );
+
+                    // Update connection status if it's a network error
+                    if (error.name === 'TypeError' || error.message.includes('network') || error.message.includes('connection')) {
+                        updateConnectionStatus('disconnected');
+                    }
+
+                    // Update the message with an error indicator if we have a partial response
+                    const messageIndex = messages.value.findIndex(m => m.id === messageId);
+                    if (messageIndex !== -1) {
+                        const currentContent = messages.value[messageIndex].content;
+
+                        let errorMessage;
+                        if (currentContent) {
+                            // We have some content already
+                            errorMessage = currentContent + "\n\n⚠️ *The response was interrupted due to an error.*";
+                        } else {
+                            // No content was received
+                            errorMessage = "⚠️ *Unable to generate a response. Please try again.*";
+                        }
+
+                        // Update the message
+                        const updatedMessage = {...messages.value[messageIndex]};
+                        updatedMessage.content = errorMessage;
+                        messages.value.splice(messageIndex, 1, updatedMessage);
+                    }
+
+                    // Clean up streaming state
+                    finalizeStreaming();
+                };
+
+
+                const sendMessage = sendStreamingMessage;
                 
                 const handleEnterKey = (event) => {
                     // Отправка сообщения по Enter, но не по Shift+Enter
@@ -1152,7 +1957,8 @@
                     removeFile,
                     setModel,
                     toggleSidebar,
-                    formatTime
+                    formatTime,
+                    formatMessageContent
                 };
             }
         });
