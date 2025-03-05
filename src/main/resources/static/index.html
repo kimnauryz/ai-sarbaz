@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spring AI Chat</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <link rel="stylesheet" href="/css/animations.css">
+</head>
+<body>
+    <div id="app">
+        <!-- App will be mounted here -->
+    </div>
+
+    <!-- Templates for Vue Components -->
+    <script type="text/x-template" id="chat-list-template">
+        <div class="sidebar" :class="{ 'collapsed': isSidebarCollapsed }">
+            <button class="btn btn-primary new-chat-btn" @click="createNewChat">
+                <i class="bi bi-plus-circle"></i>
+                <span>Новый чат</span>
+            </button>
+            
+            <div class="search-input">
+                <i class="bi bi-search"></i>
+                <input type="text" class="form-control" placeholder="Поиск чата..." v-model="searchQuery">
+            </div>
+            
+            <div class="dropdown dropdown-models">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="modelsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <span>{{ currentModel }}</span>
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="modelsDropdown">
+                    <li v-for="model in availableModels" :key="model">
+                        <a class="dropdown-item" href="#" @click.prevent="setModel(model)">{{ model }}</a>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="chat-list-header">
+                <span>Ваши чаты</span>
+                <button class="btn btn-sm btn-link text-white p-0" @click="loadChats">
+                    <i class="bi bi-arrow-clockwise"></i>
+                </button>
+            </div>
+            
+            <div class="chat-list">
+                <div v-for="chat in filteredChats" 
+                    :key="chat.id" 
+                    class="chat-item" 
+                    :class="{ 'active': currentChat && currentChat.id === chat.id }"
+                    @click="selectChat(chat)">
+                    
+                    <div class="chat-title" :title="chat.title">{{ chat.title }}</div>
+                    
+                    <div class="chat-actions">
+                        <button class="btn btn-sm btn-link p-0 me-2 text-white" @click.stop="showRenameModal(chat)">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-link p-0 text-white" @click.stop="showDeleteModal(chat)">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div v-if="filteredChats.length === 0" class="text-center text-muted mt-3">
+                    <small>Нет доступных чатов</small>
+                </div>
+            </div>
+            
+            <div class="sidebar-footer">
+                <p>Spring AI Chat © 2025</p>
+            </div>
+        </div>
+    </script>
+
+    <script type="text/x-template" id="chat-message-template">
+        <div :class="['message', message.type.toLowerCase() + '-message',
+                isStreaming && message.id.startsWith('temp-assistant') ? 'streaming-message' : '']">
+            <div class="message-content" v-html="formattedContent"></div>
+            
+            <!-- Attachments, if any -->
+            <div v-if="message.attachments && message.attachments.length > 0" class="message-attachments mt-2">
+                <message-attachment 
+                    v-for="(attachment, i) in message.attachments" 
+                    :key="i" 
+                    :attachment="attachment">
+                </message-attachment>
+            </div>
+            
+            <div class="message-time">{{ formattedTime }}</div>
+        </div>
+    </script>
+
+    <script type="text/x-template" id="message-attachment-template">
+        <div class="attachment-badge">
+            <i class="bi bi-paperclip"></i>
+            {{ attachment.filename }}
+        </div>
+    </script>
+
+    <script type="text/x-template" id="chat-input-template">
+        <div class="chat-input-container">
+            <div v-if="isStreaming" class="streaming-status mb-2">
+                <div class="spinner-border spinner-border-sm text-primary me-2" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <span class="small text-muted">Generating response...</span>
+            </div>
+
+            <div class="file-list" v-if="selectedFiles.length > 0">
+                <div v-for="(file, index) in selectedFiles" :key="index" class="file-item">
+                    {{ file.name }}
+                    <span class="file-remove" @click="removeFile(index)">×</span>
+                </div>
+            </div>
+
+            <div class="input-row">
+                <textarea
+                    class="form-control chat-input"
+                    placeholder="Введите ваше сообщение..."
+                    rows="2"
+                    v-model="message"
+                    @keydown.enter.prevent="handleEnterKey"
+                    :disabled="isStreaming">
+                </textarea>
+
+                <button class="btn btn-primary btn-send"
+                        @click="sendMessage"
+                        :disabled="isStreaming || !message.trim()">
+                    <i class="bi" :class="isStreaming ? 'bi-hourglass-split' : 'bi-send'"></i>
+                </button>
+            </div>
+
+            <div class="file-upload">
+                <label for="attachments" class="btn btn-sm btn-outline-secondary me-2" :class="{ 'disabled': isStreaming }">
+                    <i class="bi bi-paperclip me-1"></i> Прикрепить файл
+                </label>
+                <input type="file" id="attachments" multiple @change="handleFileUpload" style="display: none;" :disabled="isStreaming">
+                <small class="text-muted" v-if="selectedFiles.length > 0">
+                    Выбрано файлов: {{ selectedFiles.length }}
+                </small>
+            </div>
+        </div>
+    </script>
+
+    <script type="text/x-template" id="error-toast-template">
+        <div class="error-toast" :class="{ 'show': visible }">
+            <div class="error-toast-header">
+                <span class="error-toast-title">{{ title }}</span>
+                <button class="error-toast-close" @click="close">&times;</button>
+            </div>
+            <div class="error-toast-body">
+                {{ message }}
+            </div>
+        </div>
+    </script>
+
+    <script type="text/x-template" id="connection-status-template">
+        <div v-if="status !== 'connected'"
+            :class="['connection-status',
+                status === 'reconnecting' ? 'connection-status-reconnecting' : 'connection-status-disconnected']">
+            <div class="connection-status-icon"></div>
+            <span v-if="status === 'disconnected'">Disconnected</span>
+            <span v-else-if="status === 'reconnecting'">Reconnecting...</span>
+        </div>
+    </script>
+
+    <!-- Rename Modal Template -->
+    <script type="text/x-template" id="rename-modal-template">
+        <div class="modal fade" id="renameChatModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Переименовать чат</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="text" class="form-control" v-model="title" placeholder="Название чата"
+                               @keyup.enter="confirm">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                        <button type="button" class="btn btn-primary" @click="confirm">Сохранить</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </script>
+
+    <script type="text/x-template" id="delete-modal-template">
+        <div class="modal fade" id="deleteChatModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Подтверждение удаления</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Вы уверены, что хотите удалить чат "{{ chat ? chat.title : '' }}"?</p>
+                        <p class="text-danger">Это действие нельзя отменить.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                        <button type="button" class="btn btn-danger" @click="confirm">Удалить</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </script>
+
+    <!-- Load scripts -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Load application scripts -->
+    <script src="/js/utils.js"></script>
+    <script src="/js/api.js"></script>
+    <script src="/js/components/ui/ConnectionStatus.js"></script>
+    <script src="/js/components/ui/ErrorToast.js"></script>
+    <script src="/js/components/ui/StreamingStatus.js"></script>
+    <script src="/js/components/chat/MessageAttachment.js"></script>
+    <script src="/js/components/chat/ChatMessage.js"></script>
+    <script src="/js/components/chat/ChatInput.js"></script>
+    <script src="/js/components/chat/ChatList.js"></script>
+    <script src="/js/components/modals/RenameModal.js"></script>
+    <script src="/js/components/modals/DeleteModal.js"></script>
+    <script src="/js/store/ui.js"></script>
+    <script src="/js/store/chat.js"></script>
+    <script src="/js/store/index.js"></script>
+    <script src="/js/app.js"></script>
+</body>
+</html>

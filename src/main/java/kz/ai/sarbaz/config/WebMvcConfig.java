@@ -17,7 +17,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
         // Маршрут для Vue приложения
-        registry.addViewController("/app").setViewName("forward:/static/vue-chat.html");
+        registry.addViewController("/app").setViewName("forward:/static/index.html");
         
         // Перенаправление с корня на приложение
         registry.addViewController("/").setViewName("redirect:/app");

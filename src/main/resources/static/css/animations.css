@@ -1,0 +1,135 @@
+/* Animation styles */
+
+/* Streaming message styles */
+.streaming-message .message-content {
+    position: relative;
+    min-height: 1.5em;
+    line-height: 1.6;
+}
+
+/* Animated cursor that blinks at the end of streaming text */
+.streaming-message .message-content::after {
+    content: '';
+    display: inline-block;
+    width: 2px;
+    height: 1.2em;
+    background-color: #0d6efd;
+    margin-left: 2px;
+    vertical-align: middle;
+    animation: streamingCursor 0.8s infinite;
+    position: relative;
+    top: 2px;
+}
+
+@keyframes streamingCursor {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+/* Newest chunk animations */
+.newest-chunk {
+    display: inline;
+    opacity: 0;
+    animation: fadeInWords 0.3s ease-in forwards, naturalHighlight 2s ease-out forwards;
+}
+
+@keyframes fadeInWords {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+@keyframes naturalHighlight {
+    0% { background-color: rgba(13, 110, 253, 0.1); }
+    100% { background-color: transparent; }
+}
+
+/* Typing indicator animations */
+.typing-indicator {
+    position: relative;
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 10px;
+    padding: 10px 15px;
+    margin-bottom: 15px;
+    max-width: 120px;
+    opacity: 0.9;
+    transition: opacity 0.3s ease;
+}
+
+.typing-indicator:hover {
+    opacity: 1;
+}
+
+.typing-dots {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.typing-dot {
+    width: 6px;
+    height: 6px;
+    margin: 0 3px;
+    background-color: #6c757d;
+    border-radius: 50%;
+    animation: typingPulse 1.5s infinite ease-in-out;
+}
+
+.typing-dot:nth-child(1) { animation-delay: 0s; }
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typingPulse {
+    0%, 100% { transform: scale(1); opacity: 0.7; }
+    50% { transform: scale(1.2); opacity: 1; }
+}
+
+/* Message transitions */
+.message-enter-active, .message-leave-active {
+    transition: all 0.3s ease;
+}
+
+.message-enter-from, .message-leave-to {
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+.message-enter-active {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.message-enter-from {
+    opacity: 0;
+    transform: translateY(10px);
+}
+
+/* General transitions */
+.fade-enter-active, .fade-leave-active {
+    transition: opacity 0.3s;
+}
+
+.fade-enter-from, .fade-leave-to {
+    opacity: 0;
+}
+
+/* Toast animation */
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideOut {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(100%); opacity: 0; }
+}
+
+/* Connection status animation */
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.1); opacity: 0.7; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.connection-status-reconnecting .connection-status-icon {
+    animation: pulse 1.5s infinite;
+}

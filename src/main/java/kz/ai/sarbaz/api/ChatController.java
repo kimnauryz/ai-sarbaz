@@ -141,7 +141,7 @@ public class ChatController {
     /**
      * Получить историю чата с пагинацией
      */
-    @GetMapping("/history/{chatId}")
+    @GetMapping("/chats/{chatId}/history")
     public PageResponse<MessageDTO> getChatHistory(
             @PathVariable String chatId,
             @RequestParam(defaultValue = "0") int page,
