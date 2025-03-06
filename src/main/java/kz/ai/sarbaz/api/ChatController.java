@@ -27,7 +27,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/chat")
+@RequestMapping("/chats")
 @RequiredArgsConstructor
 public class ChatController {
 
@@ -37,15 +37,6 @@ public class ChatController {
 
     // Максимальное количество предыдущих сообщений для контекста
     private static final int MAX_HISTORY_MESSAGES = 10;
-
-    @GetMapping("/llama/ask")
-    public Map<String, String> ask(@RequestParam(value = "message", defaultValue = "Introduce you as best helper of humanity") String message,
-                                   @RequestParam(name = "role", defaultValue = "ai") String role) {
-        return Map.of("completion", ollamaChatClient.prompt()
-                .system(sp -> sp.param("role", role))
-                .user(message)
-                .call().content());
-    }
 
     @PostMapping(value = "/prompt")
     public ChatResponse processPrompt(
@@ -129,7 +120,7 @@ public class ChatController {
     /**
      * Получить список чатов с пагинацией
      */
-    @GetMapping("/chats")
+    @GetMapping
     public PageResponse<ChatDTO> getChats(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -141,7 +132,7 @@ public class ChatController {
     /**
      * Получить историю чата с пагинацией
      */
-    @GetMapping("/chats/{chatId}/history")
+    @GetMapping("/{chatId}/history")
     public PageResponse<MessageDTO> getChatHistory(
             @PathVariable String chatId,
             @RequestParam(defaultValue = "0") int page,
@@ -153,7 +144,7 @@ public class ChatController {
     /**
      * Обновить название чата
      */
-    @PutMapping("/chats/{chatId}/title")
+    @PutMapping("/{chatId}/title")
     public ChatDTO updateChatTitle(
             @PathVariable String chatId,
             @RequestBody Map<String, String> request) {
@@ -169,7 +160,7 @@ public class ChatController {
     /**
      * Архивировать чат
      */
-    @PutMapping("/chats/{chatId}/archive")
+    @PutMapping("/{chatId}/archive")
     public ResponseEntity<Void> archiveChat(@PathVariable String chatId) {
         chatService.archiveChat(chatId);
         return ResponseEntity.ok().build();
@@ -178,7 +169,7 @@ public class ChatController {
     /**
      * Удалить чат
      */
-    @DeleteMapping("/chats/{chatId}")
+    @DeleteMapping("/{chatId}")
     public ResponseEntity<Void> deleteChat(@PathVariable String chatId) {
         chatService.deleteChat(chatId);
         return ResponseEntity.ok().build();
@@ -187,7 +178,7 @@ public class ChatController {
     /**
      * Создать новый пустой чат
      */
-    @PostMapping("/chats")
+    @PostMapping
     public ChatDTO createNewChat(@RequestBody Map<String, String> request) {
         String modelName = request.getOrDefault("model", "llama3.2:3b");
         Chat chat = chatService.createNewChat(modelName);

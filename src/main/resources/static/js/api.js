@@ -6,11 +6,11 @@
 const API = {
     // Base endpoints for different resources
     endpoints: {
-        chats: '/chat/chats',
-        prompt: '/chat/prompt',
-        streamingPrompt: '/chat/streaming/prompt',
-        health: '/chat/health',
-        heartbeat: '/chat/streaming/heartbeat'
+        chats: '/chats',
+        prompt: '/chats/prompt',
+        streamingPrompt: '/chats/streaming/prompt',
+        health: '/chats/health',
+        heartbeat: '/chats/streaming/heartbeat'
     },
 
     /**

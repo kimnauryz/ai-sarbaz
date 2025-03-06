@@ -31,7 +31,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/chat/streaming")
+@RequestMapping("/chats/streaming")
 @RequiredArgsConstructor
 @Slf4j
 public class ChatStreamingController {

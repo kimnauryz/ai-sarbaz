@@ -18,7 +18,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
     public void addViewControllers(ViewControllerRegistry registry) {
         // Маршрут для Vue приложения
         registry.addViewController("/app").setViewName("forward:/static/index.html");
-        
+        registry.addViewController("/markdown").setViewName("forward:/static/markdown.html");
+
         // Перенаправление с корня на приложение
         registry.addViewController("/").setViewName("redirect:/app");
     }

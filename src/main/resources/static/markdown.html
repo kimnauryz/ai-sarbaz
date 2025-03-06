@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spring AI Chat - Markdown Support</title>
+
+    <!-- External CSS Libraries -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/simplemde@1.11.2/dist/simplemde.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/default.min.css">
+
+    <!-- Application CSS -->
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <link rel="stylesheet" href="/css/animations.css">
+    <link rel="stylesheet" href="/css/markdown.css">
+</head>
+<body>
+<div id="app">
+    <!-- Connection Status Indicator (shown when disconnected or reconnecting) -->
+    <div class="connection-status connection-status-disconnected" style="display: none;">
+        <div class="connection-status-icon"></div>
+        <span>Disconnected</span>
+    </div>
+
+    <!-- Error Toast Notification -->
+    <div class="error-toast" style="display: none;">
+        <div class="error-toast-header">
+            <span class="error-toast-title">Error</span>
+            <button class="error-toast-close">&times;</button>
+        </div>
+        <div class="error-toast-body">
+            An error occurred.
+        </div>
+    </div>
+
+    <!-- Sidebar with chat list -->
+    <div class="sidebar">
+        <button class="btn btn-primary new-chat-btn">
+            <i class="bi bi-plus-circle"></i>
+            <span>Новый чат</span>
+        </button>
+
+        <div class="search-input">
+            <i class="bi bi-search"></i>
+            <input type="text" class="form-control" placeholder="Поиск чата...">
+        </div>
+
+        <div class="dropdown dropdown-models">
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="modelsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                <span>llama3.2:3b</span>
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="modelsDropdown">
+                <li><a class="dropdown-item" href="#">llama3.2:3b</a></li>
+                <li><a class="dropdown-item" href="#">llama3.2:8b</a></li>
+                <li><a class="dropdown-item" href="#">llama3.2:70b</a></li>
+                <li><a class="dropdown-item" href="#">mistral</a></li>
+            </ul>
+        </div>
+
+        <div class="chat-list-header">
+            <span>Ваши чаты</span>
+            <button class="btn btn-sm btn-link text-white p-0 reload-chats">
+                <i class="bi bi-arrow-clockwise"></i>
+            </button>
+        </div>
+
+        <div class="chat-list">
+            <!-- Chat items will be inserted here -->
+        </div>
+
+        <div class="sidebar-footer">
+            <p>Spring AI Chat © 2025</p>
+        </div>
+    </div>
+
+    <!-- Main content area -->
+    <div class="main-content">
+        <!-- Empty state (shown when no chat is selected) -->
+        <div class="empty-state">
+            <i class="bi bi-chat-dots"></i>
+            <h3>Выберите чат или начните новый</h3>
+            <p>Используйте кнопку "Новый чат" слева для создания беседы</p>
+            <button class="btn btn-primary mt-3 new-chat-btn-empty">
+                <i class="bi bi-plus-circle me-2"></i>Новый чат
+            </button>
+        </div>
+
+        <!-- Chat header -->
+        <div class="chat-header" style="display: none;">
+            <div class="d-flex align-items-center">
+                <button class="btn btn-sm btn-link p-0 mobile-toggle">
+                    <i class="bi bi-list fs-4"></i>
+                </button>
+                <h5 class="mb-0"></h5>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-sm btn-outline-secondary rename-chat-btn">
+                    <i class="bi bi-pencil me-1"></i> Переименовать
+                </button>
+                <button class="btn btn-sm btn-outline-secondary archive-chat-btn">
+                    <i class="bi bi-archive me-1"></i> Архивировать
+                </button>
+                <button class="btn btn-sm btn-outline-danger delete-chat-btn">
+                    <i class="bi bi-trash me-1"></i> Удалить
+                </button>
+            </div>
+        </div>
+
+        <!-- Chat messages -->
+        <div class="chat-messages" style="display: none;">
+            <!-- Messages will be inserted here -->
+        </div>
+
+        <!-- Pagination -->
+        <nav aria-label="История сообщений" class="d-flex justify-content-center mt-2" style="display: none;">
+            <ul class="pagination pagination-sm">
+                <!-- Pagination items will be inserted here -->
+            </ul>
+        </nav>
+
+        <!-- Chat input -->
+        <div class="chat-input-container" style="display: none;">
+            <div class="streaming-status mb-2" style="display: none;">
+                <div class="spinner-border spinner-border-sm text-primary me-2" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <span class="small text-muted">Generating response...</span>
+            </div>
+
+            <div class="file-list">
+                <!-- File items will be inserted here -->
+            </div>
+
+            <div class="input-row position-relative">
+                <!-- SimpleMDE will replace this textarea -->
+                <textarea
+                        class="form-control chat-input"
+                        placeholder="Введите ваше сообщение..."
+                        rows="3"
+                ></textarea>
+
+                <button class="btn btn-primary btn-send">
+                    <i class="bi bi-send"></i>
+                </button>
+            </div>
+
+            <div class="file-upload mt-2 d-flex align-items-center flex-wrap">
+                <label for="attachments" class="btn btn-sm btn-outline-secondary me-2 mb-1">
+                    <i class="bi bi-paperclip me-1"></i> Прикрепить файл
+                </label>
+                <input type="file" id="attachments" multiple style="display: none;">
+                <small class="text-muted selected-files-count me-2 mb-1" style="display: none;">
+                    Выбрано файлов: <span>0</span>
+                </small>
+                <button class="btn btn-sm btn-outline-info mb-1 me-2 markdown-guide-btn" type="button">
+                    <i class="bi bi-markdown me-1"></i> Markdown
+                </button>
+                <div class="markdown-shortcuts mb-1">
+                    <small class="text-muted">
+                        <kbd>Ctrl+Enter</kbd> для отправки
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Rename Modal -->
+<div class="modal fade" id="renameChatModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Переименовать чат</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="text" class="form-control" placeholder="Название чата">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-primary rename-confirm">Сохранить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteChatModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Подтверждение удаления</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Вы уверены, что хотите удалить этот чат?</p>
+                <p class="text-danger">Это действие нельзя отменить.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-danger delete-confirm">Удалить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Markdown Guide Modal -->
+<div class="modal fade" id="markdownGuideModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Руководство по Markdown</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Основные элементы</h6>
+                        <pre><code># Заголовок 1
+## Заголовок 2
+### Заголовок 3
+
+**Жирный текст**
+*Курсив*
+~~Зачеркнутый текст~~
+
+> Цитата
+
+- Маркированный список
+- Элемент 2
+  - Вложенный элемент
+
+1. Нумерованный список
+2. Второй элемент</code></pre>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Продвинутые элементы</h6>
+                        <pre><code>```python
+def hello_world():
+    print("Hello, world!")
+```
+
+[Ссылка](https://example.com)
+
+![Описание изображения](url_изображения)
+
+Таблица:
+| Заголовок 1 | Заголовок 2 |
+|-------------|-------------|
+| Ячейка 1    | Ячейка 2    |
+
+`Встроенный код`
+
+Горизонтальная линия:
+---</code></pre>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Понятно</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Load external libraries -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked@4.3.0/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/simplemde@1.11.2/dist/simplemde.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+
+<!-- Load application scripts -->
+<script src="/js/chat-app.js"></script>
+<script src="/js/markdown-support.js"></script>
+</body>
+</html>

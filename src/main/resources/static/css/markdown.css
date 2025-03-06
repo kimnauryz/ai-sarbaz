@@ -1,0 +1,246 @@
+/* Markdown styling for chat messages */
+
+/* Better styling for code blocks */
+.message-content pre {
+    background-color: #f6f8fa;
+    border-radius: 6px;
+    padding: 16px;
+    margin: 12px 0;
+    overflow: auto;
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+    font-size: 85%;
+    line-height: 1.45;
+}
+
+.message-content code {
+    background-color: rgba(175, 184, 193, 0.2);
+    border-radius: 3px;
+    padding: 0.2em 0.4em;
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+    font-size: 85%;
+}
+
+.message-content pre code {
+    background-color: transparent;
+    padding: 0;
+    border-radius: 0;
+}
+
+/* Table styling */
+.message-content table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 12px 0;
+    font-size: 0.9em;
+}
+
+.message-content table th,
+.message-content table td {
+    border: 1px solid #dfe2e5;
+    padding: 8px 12px;
+}
+
+.message-content table th {
+    background-color: #f6f8fa;
+    font-weight: 600;
+}
+
+.message-content table tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+/* Blockquote styling */
+.message-content blockquote {
+    padding: 0 1em;
+    color: #57606a;
+    border-left: 3px solid #d0d7de;
+    margin: 12px 0;
+}
+
+/* Headings */
+.message-content h1,
+.message-content h2,
+.message-content h3,
+.message-content h4,
+.message-content h5,
+.message-content h6 {
+    margin-top: 16px;
+    margin-bottom: 10px;
+    font-weight: 600;
+    line-height: 1.25;
+}
+
+.message-content h1 {
+    font-size: 2em;
+    border-bottom: 1px solid #eaecef;
+    padding-bottom: 0.3em;
+}
+
+.message-content h2 {
+    font-size: 1.5em;
+    border-bottom: 1px solid #eaecef;
+    padding-bottom: 0.3em;
+}
+
+.message-content h3 {
+    font-size: 1.25em;
+}
+
+.message-content h4 {
+    font-size: 1em;
+}
+
+.message-content h5 {
+    font-size: 0.875em;
+}
+
+.message-content h6 {
+    font-size: 0.85em;
+    color: #57606a;
+}
+
+/* Lists */
+.message-content ul,
+.message-content ol {
+    padding-left: 2em;
+    margin: 12px 0;
+}
+
+.message-content li + li {
+    margin-top: 4px;
+}
+
+.message-content li > p {
+    margin-top: 8px;
+}
+
+/* Horizontal rule */
+.message-content hr {
+    height: 1px;
+    padding: 0;
+    margin: 24px 0;
+    background-color: #d0d7de;
+    border: 0;
+}
+
+/* Links */
+.message-content a {
+    color: #0969da;
+    text-decoration: none;
+}
+
+.message-content a:hover {
+    text-decoration: underline;
+}
+
+/* Images */
+.message-content img {
+    max-width: 100%;
+    height: auto;
+    margin: 8px 0;
+    border-radius: 3px;
+}
+
+/* Task lists */
+.message-content input[type="checkbox"] {
+    margin-right: 0.5em;
+}
+
+/* SimpleMDE editor customizations */
+.CodeMirror {
+    border-radius: 20px;
+    border-color: #ced4da;
+    height: auto;
+    min-height: 60px;
+    max-height: 200px;
+}
+
+.editor-toolbar {
+    border-radius: 4px 4px 0 0;
+    opacity: 0.7;
+    border: none;
+    background-color: #f8f9fa;
+}
+
+.editor-toolbar:hover,
+.editor-toolbar.active {
+    opacity: 1;
+}
+
+.editor-toolbar button {
+    color: #495057;
+}
+
+.editor-toolbar button:hover,
+.editor-toolbar button.active {
+    background-color: #e9ecef;
+    border-color: #ced4da;
+}
+
+/* Mobile responsiveness for the editor */
+@media (max-width: 768px) {
+    .editor-toolbar button.preview,
+    .editor-toolbar button.guide,
+    .editor-toolbar button.side-by-side {
+        display: none;
+    }
+
+    .editor-toolbar button {
+        padding: 0 5px;
+    }
+}
+
+/* Ensure markdown content has proper spacing */
+.message-content p {
+    margin: 8px 0;
+}
+
+/* Adjustments to ensure the SimpleMDE editor fits into the chat interface */
+.input-row {
+    display: block;  /* Change from flex to block for SimpleMDE */
+    margin-bottom: 5px;
+}
+
+.editor-toolbar.fullscreen {
+    z-index: 1100;
+}
+
+.CodeMirror-fullscreen {
+    z-index: 1050;
+}
+
+/* Adjust send button position */
+.btn-send {
+    position: absolute;
+    right: 25px;
+    bottom: 25px;
+    z-index: 10;
+}
+
+/* Properly format inline code */
+.message-content code:not(pre code) {
+    white-space: nowrap;
+}
+
+/* Streaming message animation adjustments for markdown */
+.streaming-message .message-content::after {
+    height: 1.3em;
+    top: 3px;
+}
+
+/* Better highlighting for newest chunk in markdown context */
+.newest-chunk {
+    display: inline-block;
+    animation: fadeInWords 0.3s ease-in forwards, naturalHighlight 2s ease-out forwards;
+}
+
+/* Ensure proper formatting in markdown lists */
+.message-content ul li,
+.message-content ol li {
+    margin-bottom: 3px;
+}
+
+/* Avoid overly large font sizes in markdown */
+.message-content {
+    font-size: 1rem;
+}

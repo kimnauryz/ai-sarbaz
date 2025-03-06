@@ -42,7 +42,8 @@ const Utils = {
         }
 
         // Initialize last content length for this message if not existing
-        if (lastContentLength[streamingMessageId] === undefined) {
+        if (!lastContentLength || !lastContentLength[streamingMessageId]) {
+            if (!lastContentLength) lastContentLength = {};
             lastContentLength[streamingMessageId] = 0;
         }
 
@@ -90,47 +91,57 @@ const Utils = {
             let buffer = '';
 
             while (true) {
-                const { done, value } = await reader.read();
+                try {
+                    const { done, value } = await reader.read();
 
-                if (done) {
-                    console.log('Stream completed naturally');
-                    break;
-                }
-
-                // Decode and process the chunk
-                const chunk = decoder.decode(value, { stream: true });
-                buffer += chunk;
-
-                // Split the buffer by SSE delimiter (double newline)
-                const events = buffer.split('\n\n');
-                buffer = events.pop() || ''; // Keep the last chunk (might be incomplete)
-
-                // Process each complete event
-                for (const eventText of events) {
-                    if (!eventText.trim()) continue;
-
-                    // Parse event type and data
-                    const eventLines = eventText.split('\n');
-                    let eventType = 'message';
-                    let eventData = '';
-
-                    for (const line of eventLines) {
-                        if (line.startsWith('event:')) {
-                            eventType = line.substring(6).trim();
-                        } else if (line.startsWith('data:')) {
-                            eventData = line.substring(5).trim();
-                        }
+                    if (done) {
+                        console.log('Stream completed naturally');
+                        break;
                     }
 
-                    // Handle different event types
-                    if (eventType === 'message' && eventData) {
-                        onChunk(eventData);
-                    } else if (eventType === 'error') {
-                        if (eventData.startsWith('error:')) {
-                            eventData = eventData.substring(6).trim();
+                    // Decode and process the chunk
+                    const chunk = decoder.decode(value, { stream: true });
+                    buffer += chunk;
+
+                    // Split the buffer by SSE delimiter (double newline)
+                    const events = buffer.split('\n\n');
+                    buffer = events.pop() || ''; // Keep the last chunk (might be incomplete)
+
+                    // Process each complete event
+                    for (const eventText of events) {
+                        if (!eventText.trim()) continue;
+
+                        // Parse event type and data
+                        const eventLines = eventText.split('\n');
+                        let eventType = 'message';
+                        let eventData = '';
+
+                        for (const line of eventLines) {
+                            if (line.startsWith('event:')) {
+                                eventType = line.substring(6).trim();
+                            } else if (line.startsWith('data:')) {
+                                eventData = line.substring(5).trim();
+                            }
                         }
-                        throw new Error(eventData || 'Unknown streaming error');
+
+                        // Handle different event types
+                        if (eventType === 'message' && eventData) {
+                            onChunk(eventData);
+                        } else if (eventType === 'error') {
+                            if (eventData.startsWith('error:')) {
+                                eventData = eventData.substring(6).trim();
+                            }
+                            throw new Error(eventData || 'Unknown streaming error');
+                        }
                     }
+                } catch (readError) {
+                    // Check if it's an abort error or other read error
+                    if (readError.name === 'AbortError') {
+                        throw new Error('Request timed out');
+                    }
+
+                    console.error('Error reading stream chunk:', readError);
+                    throw readError;
                 }
             }
 
@@ -146,7 +157,7 @@ const Utils = {
      */
     animateScrollToBottom: (container) => {
         if (!container) return;
-        
+
         const scrollHeight = container.scrollHeight;
         const currentScroll = container.scrollTop + container.clientHeight;
 
