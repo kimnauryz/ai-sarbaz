@@ -111,7 +111,7 @@ const UI_Store = Vue.reactive({
         // Check if EventSource is supported
         if (typeof EventSource !== 'undefined') {
             try {
-                const heartbeatSource = new EventSource('/chat/streaming/heartbeat');
+                const heartbeatSource = new EventSource(API.endpoints.heartbeat);
 
                 heartbeatSource.addEventListener('heartbeat', (event) => {
                     console.log('Heartbeat received:', event.data);
